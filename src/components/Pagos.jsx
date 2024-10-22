@@ -2,9 +2,9 @@ import React from 'react';
 
 export const Pagos = ({ pagar, pagado }) => {
     return (
-        <div className='mt-8'>
+        <div className='pl-80 mt-8 text-center'>
             <button
-                className='bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4'
+                className='bg-green-500 text-white py-2 px-4 rounded mt-4'
                 onClick={pagar}
             >
                 Pagar
