@@ -1,16 +1,30 @@
-import { Menu } from "./components/Menu";
+import React, { useState } from 'react';
+import { Menu } from './components/Menu';
+import { Ordenes } from './components/Ordenes';
+import { Pagos } from './components/Pagos';
 
-function App() {
+
+
+const App = () => {
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [pagado, setIsPaid] = useState(false);
+
+  const handleAddItem = (item) => {
+    setSelectedItems([...selectedItems, item]);
+  };
+
+  const handlePay = () => {
+    setSelectedItems([]);
+    setIsPaid(true);
+  };
+
   return (
-    <>
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 pb-6">
-        <h1 className="text-5xl font-bold text-center mb-10 pt-9">
-          Menu
-        </h1>
-        <Menu />
-      </div>
-    </>
+    <div className='bg-white p-6 max-w-5xl pb-6'>
+      <Menu onAddItem={handleAddItem} />
+      <Ordenes selectedItems={selectedItems} />
+      <Pagos pagar={handlePay} pagado={pagado} />
+    </div>
   );
-}
+};
 
 export default App;
