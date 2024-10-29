@@ -4,7 +4,6 @@ import { Ordenes } from './components/Ordenes';
 import { Pagos } from './components/Pagos';
 
 
-
 const App = () => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [pagado, setIsPaid] = useState(false);
