@@ -8,13 +8,13 @@ export const LoginForm = ({ onLoginSuccess, onRegisterClick }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { user, error } = await loginUser(email, password);
+    const { user, role, error } = await loginUser(email, password);
 
     if (error) {
       setError(error);
     } else {
       setError(null);
-      onLoginSuccess();
+      onLoginSuccess(role); // Pasar el rol del usuario al componente principal
     }
   };
 

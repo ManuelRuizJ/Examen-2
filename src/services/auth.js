@@ -6,6 +6,7 @@ import {
 } from "firebase/auth";
 import { db } from "./firebaseConfig";
 import { doc, setDoc, getDoc } from "firebase/firestore";
+
 const auth = getAuth();
 
 // Registrar un usuario
@@ -18,9 +19,10 @@ const registerUser = async (email, password) => {
     );
     const user = userCredential.user;
 
+    // Guarda el usuario en Firestore con rol "user" por defecto
     await setDoc(doc(db, "Users", user.uid), {
       email: user.email,
-      role: "user",
+      role: "admin",
       createdAt: new Date(),
     });
 
@@ -32,7 +34,7 @@ const registerUser = async (email, password) => {
   }
 };
 
-// Login User
+// Iniciar sesión de usuario
 const loginUser = async (email, password) => {
   try {
     const userCredential = await signInWithEmailAndPassword(
@@ -42,18 +44,19 @@ const loginUser = async (email, password) => {
     );
     const user = userCredential.user;
 
-    const userDocRef = doc(db, "users", user.uid);
+    // Obtiene el rol del usuario desde Firestore
+    const userDocRef = doc(db, "Users", user.uid); // Cambié "users" a "Users"
     const userDoc = await getDoc(userDocRef);
     const role = userDoc.exists() ? userDoc.data().role : null;
 
     return { user, role, error: null };
   } catch (error) {
-    console.error("Error loging in user: ", error.message);
+    console.error("Error logging in user: ", error.message);
     return { user: null, role: null, error: error.message };
   }
 };
 
-// Logout User
+// Cerrar sesión de usuario
 const logoutUser = async () => {
   try {
     await signOut(auth);
