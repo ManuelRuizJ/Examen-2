@@ -19,10 +19,9 @@ const registerUser = async (email, password) => {
     );
     const user = userCredential.user;
 
-    // Guarda el usuario en Firestore con rol "user" por defecto
     await setDoc(doc(db, "Users", user.uid), {
       email: user.email,
-      role: "admin",
+      role: "user",
       createdAt: new Date(),
     });
 
@@ -34,7 +33,6 @@ const registerUser = async (email, password) => {
   }
 };
 
-// Iniciar sesión de usuario
 const loginUser = async (email, password) => {
   try {
     const userCredential = await signInWithEmailAndPassword(
@@ -43,9 +41,7 @@ const loginUser = async (email, password) => {
       password
     );
     const user = userCredential.user;
-
-    // Obtiene el rol del usuario desde Firestore
-    const userDocRef = doc(db, "Users", user.uid); // Cambié "users" a "Users"
+    const userDocRef = doc(db, "Users", user.uid);
     const userDoc = await getDoc(userDocRef);
     const role = userDoc.exists() ? userDoc.data().role : null;
 
@@ -56,7 +52,6 @@ const loginUser = async (email, password) => {
   }
 };
 
-// Cerrar sesión de usuario
 const logoutUser = async () => {
   try {
     await signOut(auth);

@@ -14,7 +14,7 @@ export const LoginForm = ({ onLoginSuccess, onRegisterClick }) => {
       setError(error);
     } else {
       setError(null);
-      onLoginSuccess(role); // Pasar el rol del usuario al componente principal
+      onLoginSuccess(role);
     }
   };
 

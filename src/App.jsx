@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import { Menu } from "./components/Menu";
 import { Ordenes } from "./components/Ordenes";
 import { LoginForm } from "./components/loginForm";
 import { RegisterForm } from "./components/registerForm";
 import { logoutUser } from "./services/auth";
 
-const SESSION_DURATION = 60 * 60 * 1000;
+const SESSION_DURATION = 3600 * 1000; // 5 segundos
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [showRegister, setShowRegister] = useState(false);
 
   useEffect(() => {
     const sessionData = localStorage.getItem("sessionData");
@@ -25,6 +30,17 @@ const App = () => {
       }
     }
   }, []);
+
+  useEffect(() => {
+    let logoutTimer;
+    if (isAuthenticated) {
+      logoutTimer = setTimeout(() => {
+        handleLogout();
+      }, SESSION_DURATION);
+    }
+
+    return () => clearTimeout(logoutTimer);
+  }, [isAuthenticated]);
 
   const handleLoginSuccess = (role) => {
     if (!role) {
@@ -49,39 +65,51 @@ const App = () => {
     localStorage.removeItem("sessionData");
   };
 
-  const toggleRegister = () => {
-    setShowRegister((prev) => !prev);
-  };
-
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-6 max-w-5xl w-full mx-auto shadow-xl rounded-lg">
-        {!isAuthenticated ? (
-          showRegister ? (
-            <RegisterForm onBackToLogin={toggleRegister} />
+    <Router>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="bg-white p-6 max-w-5xl w-full mx-auto shadow-xl rounded-lg">
+          {!isAuthenticated ? (
+            <Routes>
+              <Route
+                path="/"
+                element={<LoginForm onLoginSuccess={handleLoginSuccess} />}
+              />
+              <Route
+                path="/register"
+                element={
+                  <RegisterForm onBackToLogin={() => <Navigate to="/" />} />
+                }
+              />
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
           ) : (
-            <LoginForm
-              onLoginSuccess={handleLoginSuccess}
-              onRegisterClick={toggleRegister}
-            />
-          )
-        ) : (
-          <>
-            <button
-              onClick={handleLogout}
-              className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded"
-            >
-              Cerrar sesión
-            </button>
-            {isAdmin ? (
-              <Ordenes /> // Componente para administradores
-            ) : (
-              <Menu /> // Componente para usuarios normales
-            )}
-          </>
-        )}
+            <>
+              <button
+                onClick={handleLogout}
+                className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded"
+              >
+                Cerrar sesión
+              </button>
+              <Routes>
+                <Route
+                  path="/menu"
+                  element={isAdmin ? <Navigate to="/ordenes" /> : <Menu />}
+                />
+                <Route
+                  path="/ordenes"
+                  element={isAdmin ? <Ordenes /> : <Navigate to="/menu" />}
+                />
+                <Route
+                  path="*"
+                  element={<Navigate to={isAdmin ? "/ordenes" : "/menu"} />}
+                />
+              </Routes>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </Router>
   );
 };
 
