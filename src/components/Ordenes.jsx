@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getOrders, createOrder } from "../services/orderService";
 import { Menu } from "./Menu";
+import { Button } from "@/components/ui/button";
 
 export const Ordenes = () => {
   const [orders, setOrders] = useState([]);
