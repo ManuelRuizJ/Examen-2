@@ -11,12 +11,13 @@ import { LoginForm } from "./components/loginForm";
 import { RegisterForm } from "./components/registerForm";
 import { logoutUser } from "./services/auth";
 
-const SESSION_DURATION = 3600 * 1000; // 5 segundos
+const SESSION_DURATION = 3600 * 1000; // Duración de la sesión en milisegundos
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // Al montar el componente, verificamos si hay sesión activa
   useEffect(() => {
     const sessionData = localStorage.getItem("sessionData");
     if (sessionData) {
@@ -26,11 +27,12 @@ const App = () => {
         setIsAuthenticated(true);
         setIsAdmin(isAdmin);
       } else {
-        localStorage.removeItem("sessionData");
+        localStorage.removeItem("sessionData"); // Eliminar sesión expirada
       }
     }
   }, []);
 
+  // Temporizador de cierre de sesión cuando el usuario esté autenticado
   useEffect(() => {
     let logoutTimer;
     if (isAuthenticated) {
@@ -42,6 +44,7 @@ const App = () => {
     return () => clearTimeout(logoutTimer);
   }, [isAuthenticated]);
 
+  // Maneja el inicio de sesión exitoso
   const handleLoginSuccess = (role) => {
     if (!role) {
       console.error("Rol no definido para el usuario.");
@@ -58,6 +61,7 @@ const App = () => {
     localStorage.setItem("sessionData", JSON.stringify(sessionData));
   };
 
+  // Maneja el cierre de sesión
   const handleLogout = async () => {
     await logoutUser();
     setIsAuthenticated(false);
@@ -69,6 +73,7 @@ const App = () => {
     <Router>
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="bg-white p-6 max-w-5xl w-full mx-auto shadow-xl rounded-lg">
+          {/* Si no está autenticado, muestra Login o Registro */}
           {!isAuthenticated ? (
             <Routes>
               <Route
@@ -85,6 +90,7 @@ const App = () => {
             </Routes>
           ) : (
             <>
+              {/* Botón de cerrar sesión */}
               <button
                 onClick={handleLogout}
                 className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded"
@@ -92,6 +98,7 @@ const App = () => {
                 Cerrar sesión
               </button>
 
+              {/* Rutas principales basadas en el rol del usuario */}
               <Routes>
                 <Route
                   path="/menu"
