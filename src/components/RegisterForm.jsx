@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { registerUser } from "../services/auth";
+import { useNavigate } from "react-router-dom";
 
-export const RegisterForm = ({ onBackToLogin }) => {
+export const RegisterForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,10 +22,10 @@ export const RegisterForm = ({ onBackToLogin }) => {
 
     if (user) {
       setSuccessMessage(
-        "Cuenta creada con exito. Ahora puedes iniciar sesion."
+        "Cuenta creada con éxito. Ahora puedes iniciar sesión."
       );
       setError(null);
-      setTimeout(onBackToLogin, 2000);
+      setTimeout(() => navigate("/"), 2000);
     } else {
       setError(error || "Error al crear la cuenta");
     }
@@ -42,7 +44,7 @@ export const RegisterForm = ({ onBackToLogin }) => {
             type="email"
             required
             className="mb-2 appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            placeholder="Correo electronico"
+            placeholder="Correo electrónico"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -70,10 +72,10 @@ export const RegisterForm = ({ onBackToLogin }) => {
           </button>
         </form>
         <button
-          onClick={onBackToLogin}
+          onClick={() => navigate("/")}
           className="mt-4 text-indigo-600 hover:text-indigo-800"
         >
-          ¿Ya tienes cuenta? Inicia sesion
+          ¿Ya tienes cuenta? Inicia sesión
         </button>
       </div>
     </div>
