@@ -8,6 +8,7 @@ export const Menu = ({ onAddItem }) => {
   const [searchText, setSearchText] = useState("");
   const [sortOption, setSortOption] = useState("");
   const [priceRange, setPriceRange] = useState({ min: 0, max: Infinity });
+  const [addedItems, setAddedItems] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -28,6 +29,14 @@ export const Menu = ({ onAddItem }) => {
 
     fetchData();
   }, []);
+
+  const handleAddItem = (item) => {
+    setAddedItems((prev) => ({ ...prev, [item.id]: true }));
+    onAddItem(item);
+    setTimeout(() => {
+      setAddedItems((prev) => ({ ...prev, [item.id]: false }));
+    }, 500);
+  };
 
   const filteredData = data
     .filter(
@@ -119,7 +128,9 @@ export const Menu = ({ onAddItem }) => {
             {filteredData.map((item) => (
               <li
                 key={item.id}
-                className="bg-gray-300 p-6 rounded-lg text-center"
+                className={`bg-gray-300 p-6 rounded-lg text-center transition-transform ${
+                  addedItems[item.id] ? "scale-105 bg-green-200" : ""
+                }`}
               >
                 <h2 className="text-lg font-bold text-center mt-4">
                   {item.name}
@@ -129,8 +140,8 @@ export const Menu = ({ onAddItem }) => {
                   ${Number(item.price).toFixed(2)}
                 </p>
                 <button
-                  className="bg-blue-500 text-white font-bold py-1 px-3 rounded mt-4"
-                  onClick={() => onAddItem(item)}
+                  className="bg-blue-500 text-white font-bold py-1 px-3 rounded mt-4 transition-colors hover:bg-blue-700"
+                  onClick={() => handleAddItem(item)}
                 >
                   Agregar
                 </button>

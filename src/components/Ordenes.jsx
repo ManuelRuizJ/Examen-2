@@ -21,6 +21,9 @@ export const Ordenes = ({ isAdmin }) => {
     }),
   });
   const [error, setError] = useState("");
+  const handleRemoveItem = (itemId) => {
+    setSelectedItems(selectedItems.filter((item) => item.id !== itemId));
+  };
 
   const [activeComponent, setActiveComponent] = useState(null);
 
@@ -124,11 +127,23 @@ export const Ordenes = ({ isAdmin }) => {
               </label>
               {newOrder.items.length > 0 ? (
                 newOrder.items.map((item, index) => (
-                  <div key={index} className="flex justify-between mt-2">
-                    <span>{item.name}</span>
-                    <span>
-                      ${item.price} x {item.quantity}
-                    </span>
+                  <div
+                    key={index}
+                    className="flex justify-between items-center mt-2"
+                  >
+                    <div>
+                      <span>{item.name}</span>
+                      <span>
+                        {" "}
+                        - ${item.price} x {item.quantity}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleRemoveItem(selectedItems[index].id)}
+                      className="text-red-600 font-semibold hover:underline"
+                    >
+                      Eliminar
+                    </button>
                   </div>
                 ))
               ) : (
@@ -137,6 +152,7 @@ export const Ordenes = ({ isAdmin }) => {
                 </p>
               )}
             </div>
+
             <div className="mb-6">
               <label className="block font-bold text-gray-700 mb-2">
                 Total
