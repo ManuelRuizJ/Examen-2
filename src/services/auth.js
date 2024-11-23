@@ -9,7 +9,6 @@ import { doc, setDoc, getDoc } from "firebase/firestore";
 
 const auth = getAuth();
 
-// Registrar un usuario
 const registerUser = async (email, password) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(
