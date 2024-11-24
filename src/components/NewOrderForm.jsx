@@ -1,6 +1,17 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 
+const handleSaveOrder = () => {
+  if (newOrder.items.length === 0) {
+    setError("Debe seleccionar al menos un artículo");
+    return;
+  }
+
+  // Aquí guardas la orden y limpias el formulario si todo es correcto
+  setOrders((prevOrders) => [...prevOrders, newOrder]);
+  setNewOrder({ items: [], total: 0, payment: "" }); // Limpia el formulario
+};
+
 const NewOrderForm = ({
   newOrder = {
     items: [],

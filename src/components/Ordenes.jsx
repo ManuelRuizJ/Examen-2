@@ -11,6 +11,10 @@ export const Ordenes = ({ isAdmin }) => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [pagado, setPagado] = useState(false);
   const [expandedOrder, setExpandedOrder] = useState(null);
+  const [error, setError] = useState("");
+  const [showOrders, setShowOrders] = useState(true);
+  const [loading, setLoading] = useState(true);
+
   const [newOrder, setNewOrder] = useState({
     items: [],
     total: 0,
@@ -20,9 +24,63 @@ export const Ordenes = ({ isAdmin }) => {
       timeZone: "America/Mexico_City",
     }),
   });
-  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const fetchedOrders = await getOrders();
+
+        // Función para convertir las fechas de formato 12 horas (AM/PM) a 24 horas
+        const parseDate = (dateString) => {
+          const [datePart, timePart] = dateString.split(", ");
+          const [day, month, year] = datePart.split("/").map(Number);
+          const [time, period] = timePart.split(" ");
+          const [hours, minutes, seconds] = time.split(":").map(Number);
+
+          let hours24 = hours;
+          if (period === "p.m." && hours < 12) {
+            hours24 += 12;
+          } else if (period === "a.m." && hours === 12) {
+            hours24 = 0;
+          }
+
+          return new Date(year, month - 1, day, hours24, minutes, seconds);
+        };
+
+        // Ordenamos las órdenes por el timestamp convertido
+        const sortedOrders = fetchedOrders.sort((a, b) => {
+          const dateA = parseDate(a.timestamp);
+          const dateB = parseDate(b.timestamp);
+          return dateB - dateA; // Ordenar de más reciente a más antiguo
+        });
+
+        setOrders(sortedOrders);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        setError("Error al cargar las órdenes");
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
+  const handleSaveOrder = (newOrder) => {
+    const isDuplicate = orders.some((order) => order.id === newOrder.id);
+    if (!isDuplicate) {
+      setOrders((prevOrders) => [...prevOrders, newOrder]);
+    } else {
+      console.log("Orden duplicada");
+    }
+  };
+
   const handleRemoveItem = (itemId) => {
     setSelectedItems(selectedItems.filter((item) => item.id !== itemId));
+  };
+
+  const toggleOrdersVisibility = () => {
+    setShowOrders((prevShowOrders) => !prevShowOrders);
   };
 
   const [activeComponent, setActiveComponent] = useState(null);
@@ -39,18 +97,6 @@ export const Ordenes = ({ isAdmin }) => {
       setSelectedItems([...selectedItems, { ...item, quantity: 1 }]);
     }
   };
-
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const fetchedOrders = await getOrders();
-        setOrders(fetchedOrders);
-      } catch (error) {
-        console.error("Error al obtener las órdenes:", error);
-      }
-    };
-    fetchOrders();
-  }, []);
 
   useEffect(() => {
     const total = selectedItems.reduce(
@@ -82,7 +128,10 @@ export const Ordenes = ({ isAdmin }) => {
     try {
       await createOrder(newOrder);
       const updatedOrders = await getOrders();
-      setOrders(updatedOrders);
+      const sortedOrders = updatedOrders.sort((a, b) => {
+        return new Date(b.timestamp) - new Date(a.timestamp);
+      });
+      setOrders(sortedOrders);
       setNewOrder({
         items: [],
         total: 0,
@@ -102,6 +151,14 @@ export const Ordenes = ({ isAdmin }) => {
 
   const toggleOrderDetails = (orderId) => {
     setExpandedOrder(expandedOrder === orderId ? null : orderId);
+  };
+
+  const formatPaymentMethod = (payment) => {
+    return payment === "cash"
+      ? "Efectivo"
+      : payment === "tarjeta"
+      ? "Tarjeta"
+      : payment;
   };
 
   return (
@@ -187,6 +244,73 @@ export const Ordenes = ({ isAdmin }) => {
               Guardar Orden
             </button>
           </div>
+
+          {/* Sección de Órdenes */}
+          <div className="mt-8">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold">Órdenes</h3>
+              <Button onClick={toggleOrdersVisibility}>
+                {showOrders ? "Ocultar Órdenes" : "Mostrar Órdenes"}
+              </Button>
+            </div>
+
+            {loading ? (
+              <div className="text-center py-4">Cargando órdenes...</div>
+            ) : (
+              showOrders && (
+                <div className="space-y-4">
+                  {orders.map((order) => (
+                    <div
+                      key={order.id}
+                      className="border rounded-lg bg-white shadow-sm"
+                    >
+                      <div
+                        className="p-4 cursor-pointer hover:bg-gray-50"
+                        onClick={() => toggleOrderDetails(order.id)}
+                      >
+                        <div className="flex justify-between items-center">
+                          <h4 className="text-lg font-semibold">
+                            Orden #{order.id.slice(-4)}
+                          </h4>
+                          <span className="text-sm text-gray-500">
+                            {order.timestamp}
+                          </span>
+                        </div>
+                      </div>
+                      {expandedOrder === order.id && (
+                        <div className="p-4 border-t">
+                          <div className="space-y-2">
+                            <div>
+                              <strong>Items:</strong>
+                              <ul className="list-disc pl-5 mt-2">
+                                {order.items.map((item, idx) => (
+                                  <li key={idx}>
+                                    {item.name} - ${item.price} x{" "}
+                                    {item.quantity}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                            <div>
+                              <strong>Total:</strong> ${order.total}
+                            </div>
+                            <div>
+                              <strong>Método de Pago:</strong>{" "}
+                              {formatPaymentMethod(order.payment)}
+                            </div>
+                            <div>
+                              <strong>Estado:</strong>{" "}
+                              {order.status || "Pendiente"}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )
+            )}
+          </div>
         </>
       )}
 
@@ -223,85 +347,6 @@ export const Ordenes = ({ isAdmin }) => {
           >
             Regresar al Menú
           </button>
-        </div>
-      )}
-
-      {orders.length > 0 && !activeComponent && (
-        <div className="mt-16">
-          <h2 className="text-2xl font-bold text-center">Órdenes Existentes</h2>
-          <div className="mt-4 space-y-4">
-            {orders
-              .sort((a, b) => {
-                console.log("Fecha A (timestamp):", a.timestamp);
-                console.log("Fecha B (timestamp):", b.timestamp);
-
-                const dateA = new Date(a.timestamp);
-                const dateB = new Date(b.timestamp);
-
-                console.log("Fecha A (Date):", dateA);
-                console.log("Fecha B (Date):", dateB);
-
-                return dateB - dateA;
-              })
-              .map((order) => (
-                <div
-                  key={order.id}
-                  className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300"
-                >
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-xl font-semibold text-gray-800">
-                      Orden ID: {order.id}
-                    </h3>
-                    <Button
-                      onClick={() => toggleOrderDetails(order.id)}
-                      className="bg-blue-500 text-white py-1 px-4 rounded-lg hover:bg-blue-600 transition duration-300"
-                    >
-                      {expandedOrder === order.id
-                        ? "Ocultar detalles"
-                        : "Ver detalles"}
-                    </Button>
-                  </div>
-                  {expandedOrder === order.id && (
-                    <div className="mt-4">
-                      <h4 className="font-semibold text-gray-800">
-                        Detalles de la Orden
-                      </h4>
-                      <div className="mt-2">
-                        <p>
-                          <strong>Status:</strong> {order.status}
-                        </p>
-                        <p>
-                          <strong>Mesa:</strong> {order.table}
-                        </p>
-                        <p>
-                          <strong>Fecha y Hora:</strong> {order.timestamp}
-                        </p>
-                        <h5 className="font-semibold mt-2">Artículos:</h5>
-                        {order.items.map((item, index) => (
-                          <div
-                            key={index}
-                            className="flex justify-between mt-2"
-                          >
-                            <span>{item.name}</span>
-                            <span>
-                              ${item.price} x {item.quantity}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="mt-4 border-t pt-4">
-                        <p className="text-gray-700 font-semibold">
-                          Total: ${order.total}
-                        </p>
-                        <p className="text-gray-700">
-                          Forma de pago: {order.payment}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-          </div>
         </div>
       )}
 
