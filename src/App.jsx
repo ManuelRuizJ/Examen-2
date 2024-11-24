@@ -93,13 +93,16 @@ const App = () => {
               </button>
 
               <Routes>
-                <Route
-                  path="/menu"
-                  element={isAdmin ? <Navigate to="/ordenes" /> : <Menu />}
-                />
+                <Route path="/menu" element={<Ordenes isAdmin={isAdmin} />} />
                 <Route
                   path="/ordenes"
-                  element={isAdmin ? <Ordenes /> : <Navigate to="/menu" />}
+                  element={
+                    isAdmin ? (
+                      <Ordenes isAdmin={isAdmin} />
+                    ) : (
+                      <Navigate to="/menu" />
+                    )
+                  }
                 />
                 <Route
                   path="*"
