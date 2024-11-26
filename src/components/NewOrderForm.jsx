@@ -1,16 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-
-const handleSaveOrder = () => {
-  if (newOrder.items.length === 0) {
-    setError("Debe seleccionar al menos un artículo");
-    return;
-  }
-
-  // Aquí guardas la orden y limpias el formulario si todo es correcto
-  setOrders((prevOrders) => [...prevOrders, newOrder]);
-  setNewOrder({ items: [], total: 0, payment: "" }); // Limpia el formulario
-};
+import { useNavigate } from "react-router-dom";
 
 const NewOrderForm = ({
   newOrder = {
@@ -23,9 +13,22 @@ const NewOrderForm = ({
   error = "",
   onSaveOrder,
 }) => {
-  if (!setNewOrder || !onSaveOrder) {
-    return <div>Error: Faltan props requeridas</div>;
-  }
+  const navigate = useNavigate();
+
+  const handlePayment = () => {
+    if (newOrder.items.length === 0 || newOrder.total <= 0) {
+      alert("La orden debe tener artículos y un total válido antes de pagar.");
+      return;
+    }
+
+    navigate("/pago", {
+      state: {
+        total: newOrder.total,
+        items: newOrder.items,
+        paymentMethod: newOrder.payment,
+      },
+    });
+  };
 
   const handlePaymentChange = (e) => {
     setNewOrder((prev) => ({
@@ -87,6 +90,13 @@ const NewOrderForm = ({
         className="w-full md:w-1/2 bg-green-600 hover:bg-green-800 text-white"
       >
         Guardar Orden
+      </Button>
+      <Button
+        onClick={handlePayment}
+        variant="default"
+        className="w-full md:w-1/2 bg-blue-600 hover:bg-blue-800 text-white mt-4"
+      >
+        Pagar Ahora
       </Button>
     </div>
   );

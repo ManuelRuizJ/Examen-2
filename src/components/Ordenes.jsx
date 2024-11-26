@@ -1,3 +1,4 @@
+//MENU DE ADMINISTRADOR
 import React, { useState, useEffect } from "react";
 import { getOrders, createOrder } from "../services/orderService";
 import { Menu } from "./Menu";
@@ -5,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { CreateMenuItem } from "./CreateMenuItem";
 import { UpdateMenuItem } from "./UpdateMenuItem";
 import { DeleteMenuItem } from "./DeleteMenuItem";
+import NewOrderForm from "./NewOrderForm";
 
-export const Ordenes = ({ isAdmin }) => {
+export const Ordenes = () => {
   const [orders, setOrders] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
   const [pagado, setPagado] = useState(false);
@@ -170,81 +172,16 @@ export const Ordenes = ({ isAdmin }) => {
       {!activeComponent && (
         <>
           <Menu onAddItem={handleAddItem} />
-          <div className="mt-6 p-4 border-2 bg-gray-100 rounded-lg">
-            <h3 className="text-xl font-semibold mb-4">Nueva Orden</h3>
-            {error && (
-              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 my-4 rounded-lg">
-                <strong>Error: </strong>
-                {error}
-              </div>
-            )}
-            <div className="mb-4">
-              <label className="block font-bold text-gray-700 mb-2">
-                Artículos
-              </label>
-              {newOrder.items.length > 0 ? (
-                newOrder.items.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex justify-between items-center mt-2"
-                  >
-                    <div>
-                      <span>{item.name}</span>
-                      <span>
-                        {" "}
-                        - ${item.price} x {item.quantity}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => handleRemoveItem(selectedItems[index].id)}
-                      className="text-red-600 font-semibold hover:underline"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500">
-                  No se han seleccionado artículos.
-                </p>
-              )}
-            </div>
 
-            <div className="mb-6">
-              <label className="block font-bold text-gray-700 mb-2">
-                Total
-              </label>
-              <input
-                type="number"
-                value={newOrder.total}
-                className="block w-full p-2 border rounded-lg bg-gray-50"
-                readOnly
-              />
-            </div>
-            <div className="mb-6">
-              <label className="block font-bold text-gray-700 mb-2">
-                Método de Pago
-              </label>
-              <select
-                value={newOrder.payment}
-                onChange={(e) =>
-                  setNewOrder({ ...newOrder, payment: e.target.value })
-                }
-                className="w-full p-2 border rounded-lg bg-gray-50"
-              >
-                <option value="">Selecciona una forma de pago</option>
-                <option value="cash">Efectivo</option>
-                <option value="tarjeta">Tarjeta</option>
-              </select>
-            </div>
-            <button
-              onClick={guardarOrden}
-              className="w-full md:w-1/2 bg-green-600 text-white py-3 rounded-lg hover:bg-green-800 transition duration-300"
-            >
-              Guardar Orden
-            </button>
-          </div>
-
+          {/* Sección de Nueva Orden */}
+          <NewOrderForm
+          newOrder={newOrder}
+          setNewOrder={setNewOrder}
+          selectedItems={selectedItems}
+          error={error}
+          onSaveOrder={guardarOrden}
+          
+          />
           {/* Sección de Órdenes */}
           <div className="mt-8">
             <div className="flex justify-between items-center mb-4">
