@@ -10,6 +10,8 @@ import { Ordenes } from "./components/Ordenes";
 import { LoginForm } from "./components/loginForm";
 import { RegisterForm } from "./components/registerForm";
 import { logoutUser } from "./services/auth";
+import { Pago } from "./components/Pago"; 
+import { Confirmacion } from "./components/Confirmacion";
 
 const SESSION_DURATION = 3600 * 1000;
 
@@ -104,6 +106,8 @@ const App = () => {
                     )
                   }
                 />
+                <Route path="/pago" element={<Pago />} />
+                <Route path="/confirmacion" element={<Confirmacion />} />
                 <Route
                   path="*"
                   element={<Navigate to={isAdmin ? "/ordenes" : "/menu"} />}
