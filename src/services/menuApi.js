@@ -1,4 +1,4 @@
-const API_URL = "https://api-menu-9b5g.onrender.com/menu";
+/* const API_URL = "https://api-menu-9b5g.onrender.com/menu";
 
 async function getMenu() {
   try {
@@ -12,3 +12,4 @@ async function getMenu() {
 }
 
 export { getMenu };
+ */
