@@ -81,9 +81,9 @@ export const Ordenes = ({ isAdmin }) => {
   }, [selectedItems]);
 
   const guardarOrden = async () => {
-    if (!newOrder.payment || selectedItems.length === 0) {
+    if (selectedItems.length === 0) {
       setError(
-        "Por favor, completa todos los campos antes de guardar la orden."
+        "Por favor, selecciona al menos un artículo antes de guardar la orden."
       );
       return;
     }
