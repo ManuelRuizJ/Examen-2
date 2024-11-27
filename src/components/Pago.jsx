@@ -4,7 +4,6 @@ import { loadStripe } from "@stripe/stripe-js";
 import { CheckoutForm } from "./CheckoutForm";
 import { useLocation } from "react-router-dom";
 
-// Inicializa Stripe con tu clave pública
 const stripePromise = loadStripe("pk_test_51QP5brE4cZfsH7eSXHfcQlUbDgy2LPrRGRSJRsfeUVg5KU2F2n13p8P9GKmJBctG0OU0RxhyJ9utH3xL29t9ySCD00ZxZsupvR");
 
 export const Pago = () => {

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { useNavigate, useLocation } from "react-router-dom";
+import { collection, addDoc } from "firebase/firestore"; 
+import { db } from "../services/firebaseConfig"; 
 
 export const CheckoutForm = () => {
   const stripe = useStripe();
@@ -24,6 +26,7 @@ export const CheckoutForm = () => {
     }
 
     try {
+      // Procesar el pago
       const response = await fetch("http://localhost:5000/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -45,12 +48,33 @@ export const CheckoutForm = () => {
         setErrorMessage("Tu tarjeta ha sido rechazada.");
         setLoading(false);
       } else if (result.paymentIntent.status === "succeeded") {
-        navigate("/confirmacion", {
-          state: {
-            total,
-            method: "Tarjeta",
-          },
-        });
+        try {
+          const orderData = {
+            items: items || [],
+            total: total || 0,
+            payment: "tarjeta",
+            status: "completed",
+            timestamp: new Date().toLocaleString("es-MX", {
+              timeZone: "America/Mexico_City",
+            }),
+          };
+
+          await addDoc(collection(db, "orders"), orderData);
+
+          console.log("Orden guardada en Firebase exitosamente:", orderData);
+
+          navigate("/confirmacion", {
+            state: {
+              total,
+              method: "Tarjeta",
+              status: "completed",
+              timestamp: orderData.timestamp,
+            },
+          });
+        } catch (firebaseError) {
+          console.error("Error al guardar la orden en Firebase:", firebaseError);
+          setErrorMessage("El pago fue exitoso, pero ocurrió un error al guardar la orden.");
+        }
       } else {
         setErrorMessage("El pago no pudo ser completado.");
       }
